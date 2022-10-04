@@ -15,6 +15,30 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   String email, password;
 
+  // Loading...
+  bool _isLoading = false;
+
+  // Alert Dialog
+  showAlertDialog(BuildContext context, String msg) {
+    AlertDialog alert = AlertDialog(
+      title: Text('Login Status'),
+      content: Text(msg),
+      actions: <Widget>[
+        FlatButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text('OK'))
+      ],
+    );
+
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return alert;
+        });
+  }
+
   TextEditingController mailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
@@ -247,29 +271,44 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        body: SingleChildScrollView(
-          child: Stack(
-            children: <Widget>[
-              Container(
-                height: MediaQuery.of(context).size.height * 0.7,
-                width: MediaQuery.of(context).size.width,
-                child: Container(
-                  decoration: BoxDecoration(
-                      color: appTheme().primaryColor,
-                      borderRadius: BorderRadius.only(
-                        bottomLeft: const Radius.circular(70),
-                        bottomRight: const Radius.circular(70),
-                      )),
-                ),
-              ),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  _buildLogo(),
-                  _buildContainer(),
-                ],
-              )
-            ],
+        body: Center(
+          child: SingleChildScrollView(
+            child: _isLoading
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(15.0),
+                      child: Column(
+                        children: <Widget>[
+                          CircularProgressIndicator(),
+                          SizedBox(height: 20),
+                          Text('กำลังตรวจสอบข้อมูล')
+                        ],
+                      ),
+                    ),
+                  )
+                : Stack(
+                    children: <Widget>[
+                      Container(
+                        height: MediaQuery.of(context).size.height * 0.7,
+                        width: MediaQuery.of(context).size.width,
+                        child: Container(
+                          decoration: BoxDecoration(
+                              color: appTheme().primaryColor,
+                              borderRadius: BorderRadius.only(
+                                bottomLeft: const Radius.circular(70),
+                                bottomRight: const Radius.circular(70),
+                              )),
+                        ),
+                      ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          _buildLogo(),
+                          _buildContainer(),
+                        ],
+                      )
+                    ],
+                  ),
           ),
         ),
       ),
@@ -278,6 +317,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // ส่วนของการเขียน login การ Login
   void _login() async {
+    // แสดง Loading
+    setState(() {
+      _isLoading = true;
+    });
+
     // รับค่ามาเก็บลอง list
     var userData = {
       'email': mailController.text,
@@ -290,5 +334,21 @@ class _LoginScreenState extends State<LoginScreen> {
     print(body);
 
     // print(userData);
+    if (body['success']) {
+      // ซ่อน Loading
+      setState(() {
+        _isLoading = false;
+      });
+
+      // print('Login success');
+      showAlertDialog(context, "Login Success");
+    } else {
+      // ซ่อน Loading
+      setState(() {
+        _isLoading = false;
+      });
+      // print('Login fail');
+      showAlertDialog(context, "Login Fail!");
+    }
   }
 }
